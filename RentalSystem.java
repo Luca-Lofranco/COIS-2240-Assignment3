@@ -3,7 +3,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.io.FileWriter;
 import java.io.IOException;
-
+import java.io.FileReader;
+import java.util.Scanner;
 
 public class RentalSystem {
 	private static RentalSystem instance;
@@ -26,6 +27,112 @@ public class RentalSystem {
         return instance;
     }
     
+    
+//    loading methods
+    
+    
+    private void loadData() {
+        loadVehicles();
+        loadCustomers();
+        loadRentalRecords();
+    }
+    
+//    reads vehicle file
+    private void loadVehicles() {
+        try (Scanner reader = new Scanner(new FileReader(VEHICLES_FILE))) {
+            while (reader.hasNextLine()) {
+                String line = reader.nextLine();
+                String[] parts = line.split("\\|");
+                String type   = parts[0];
+                String plate  = parts[1];
+                String make   = parts[2];
+                String model  = parts[3];
+                int    year   = Integer.parseInt(parts[4]);
+                Vehicle.VehicleStatus status = Vehicle.VehicleStatus.valueOf(parts[5]);
+ 
+                Vehicle vehicle = null;
+ 
+                switch (type) {
+                    case "SPORTCAR" -> {
+                        int     numSeats   = Integer.parseInt(parts[6]);
+                        int     horsepower = Integer.parseInt(parts[7]);
+                        boolean hasTurbo   = Boolean.parseBoolean(parts[8]);
+                        vehicle = new SportCar(make, model, year, numSeats, horsepower, hasTurbo);
+                    }
+                    case "CAR" -> {
+                        int numSeats = Integer.parseInt(parts[6]);
+                        vehicle = new Car(make, model, year, numSeats);
+                    }
+                    case "MINIBUS" -> {
+                        boolean isAccessible = Boolean.parseBoolean(parts[6]);
+                        vehicle = new Minibus(make, model, year, isAccessible);
+                    }
+                    case "PICKUPTRUCK" -> {
+                        double  cargoSize  = Double.parseDouble(parts[6]);
+                        boolean hasTrailer = Boolean.parseBoolean(parts[7]);
+                        vehicle = new PickupTruck(make, model, year, cargoSize, hasTrailer);
+                    }
+                }
+ 
+                if (vehicle != null) {
+                    vehicle.setLicensePlate(plate);
+                    vehicle.setStatus(status);
+                    vehicles.add(vehicle);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("No existing vehicles file found. Starting fresh.");
+        }
+    }
+    
+    
+//    reads customer file
+    private void loadCustomers() {
+        try (Scanner reader = new Scanner(new FileReader(CUSTOMERS_FILE))) {
+            while (reader.hasNextLine()) {
+                String line = reader.nextLine();
+                String[] parts = line.split("\\|");
+                int    id   = Integer.parseInt(parts[0]);
+                String name = parts[1];
+                customers.add(new Customer(id, name));
+            }
+        } catch (IOException e) {
+            System.out.println("No existing customers file found. Starting fresh.");
+        }
+    }
+ 
+//    reads rental records file
+    private void loadRentalRecords() {
+        try (Scanner reader = new Scanner(new FileReader(RECORDS_FILE))) {
+            while (reader.hasNextLine()) {
+                String line = reader.nextLine();
+                String[] parts      = line.split("\\|");
+                String   recordType = parts[0];
+                String   plate      = parts[1];
+                int      customerId = Integer.parseInt(parts[2]);
+                LocalDate date      = LocalDate.parse(parts[4]);
+                double   amount     = Double.parseDouble(parts[5]);
+ 
+                Vehicle  vehicle  = findVehicleByPlate(plate);
+                Customer customer = findCustomerById(customerId);
+ 
+                if (vehicle != null && customer != null) {
+                    rentalHistory.addRecord(new RentalRecord(vehicle, customer, date, amount, recordType));
+                } else {
+                    System.out.println("Skipping record — unresolved vehicle or customer: " + line);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("No existing rental records file found. Starting fresh.");
+        }
+    }
+    
+    
+    
+//    saving text files
+    
+    
+    
 //    saves vehicle to txt file  
     private void saveVehicle(Vehicle vehicle) {
         try (FileWriter writer = new FileWriter(VEHICLES_FILE, true)) {
@@ -45,6 +152,7 @@ public class RentalSystem {
             System.out.println("Error updating vehicles to the file: " + e.getMessage());
         }
     }
+    
     
     
     private String buildVehicleLine(Vehicle vehicle) {
