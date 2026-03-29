@@ -1,6 +1,9 @@
 import java.util.List;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.io.FileWriter;
+import java.io.IOException;
+
 
 public class RentalSystem {
 	private static RentalSystem instance;
@@ -8,6 +11,11 @@ public class RentalSystem {
     private List<Vehicle> vehicles = new ArrayList<>();
     private List<Customer> customers = new ArrayList<>();
     private RentalHistory rentalHistory = new RentalHistory();
+    
+//    txt files
+    private static final String VEHICLES_FILE  = "vehicles.txt";
+    private static final String CUSTOMERS_FILE = "customers.txt";
+    private static final String RECORDS_FILE   = "rental_records.txt";
     
     private RentalSystem() {}
     
@@ -17,7 +25,66 @@ public class RentalSystem {
         }
         return instance;
     }
-
+    
+//    saves vehicle to txt file  
+    private void saveVehicle(Vehicle vehicle) {
+        try (FileWriter writer = new FileWriter(VEHICLES_FILE, true)) {
+            writer.write(buildVehicleLine(vehicle) + "\n");
+        } catch (IOException e) {
+            System.out.println("Error saving vehicle to the file: " + e.getMessage());
+        }
+    }
+    
+//    Overwrites the Vehicles txt file
+    private void overwriteAllVehicles() {
+        try (FileWriter writer = new FileWriter(VEHICLES_FILE, false)) {
+            for (Vehicle v : vehicles) {
+                writer.write(buildVehicleLine(v) + "\n");
+            }
+        } catch (IOException e) {
+            System.out.println("Error updating vehicles to the file: " + e.getMessage());
+        }
+    }
+    
+    
+    private String buildVehicleLine(Vehicle vehicle) {
+        String line = "";
+ 
+        // SportCar must be checked before Car because SportCar extends Car
+        if (vehicle instanceof SportCar sc) {
+            line = "SPORTCAR|" + sc.getLicensePlate() + "|" + sc.getMake() + "|"
+                 + sc.getModel() + "|" + sc.getYear() + "|" + sc.getStatus() + "|"
+                 + sc.getNumSeats() + "|" + sc.getHorsepower() + "|" + sc.hasTurbo();
+            
+        } else if (vehicle instanceof Car c) {
+            line = "CAR|" + c.getLicensePlate() + "|" + c.getMake() + "|"
+                 + c.getModel() + "|" + c.getYear() + "|" + c.getStatus() + "|"
+                 + c.getNumSeats();
+            
+        } else if (vehicle instanceof Minibus mb) {
+            line = "MINIBUS|" + mb.getLicensePlate() + "|" + mb.getMake() + "|"
+            + mb.getModel() + "|" + mb.getYear() + "|" + mb.getStatus() + "|" + mb.isAccessible();
+            
+        } else if (vehicle instanceof PickupTruck pt) {
+            line = "PICKUPTRUCK|" + pt.getLicensePlate() + "|" + pt.getMake() + "|"
+            + pt.getModel() + "|" + pt.getYear() + "|" + pt.getStatus() + "|"
+            + pt.getCargoSize() + "|" + pt.hasTrailer();
+        } else {
+            line = "VEHICLE|" + vehicle.getLicensePlate() + "|" + vehicle.getMake() + "|"
+            + vehicle.getModel() + "|" + vehicle.getYear() + "|" + vehicle.getStatus();
+        }
+ 
+        return line;
+    }
+    
+    private void saveCustomer(Customer customer) {
+        try (FileWriter writer = new FileWriter(CUSTOMERS_FILE, true)) {
+            writer.write(customer.getCustomerId() + "|" + customer.getCustomerName() + "\n");
+        } catch (IOException e) {
+            System.out.println("Error saving customer to the file: " + e.getMessage());
+        }
+    }
+    
     public void addVehicle(Vehicle vehicle) {
         vehicles.add(vehicle);
     }
