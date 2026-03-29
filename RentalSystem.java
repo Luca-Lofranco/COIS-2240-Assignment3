@@ -85,6 +85,20 @@ public class RentalSystem {
         }
     }
     
+    private void saveRecord(RentalRecord record) {
+        try (FileWriter writer = new FileWriter(RECORDS_FILE, true)) {
+            String line = record.getRecordType() + "|"
+                        + record.getVehicle().getLicensePlate() + "|"
+                        + record.getCustomer().getCustomerId() + "|"
+                        + record.getCustomer().getCustomerName() + "|"
+                        + record.getRecordDate() + "|"
+                        + record.getTotalAmount();
+            writer.write(line + "\n");
+        } catch (IOException e) {
+            System.out.println("Error saving rental record to file: " + e.getMessage());
+        }
+    }
+    
     public void addVehicle(Vehicle vehicle) {
         vehicles.add(vehicle);
     }

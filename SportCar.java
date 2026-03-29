@@ -7,6 +7,14 @@ public final class SportCar extends Car {
         this.horsepower = horsepower;
         this.hasTurbo = hasTurbo;
     }
+    
+    public int getHorsepower() {
+        return horsepower;
+    }
+ 
+    public boolean hasTurbo() {
+        return hasTurbo;
+    }
 
     @Override
     public String getInfo() {
