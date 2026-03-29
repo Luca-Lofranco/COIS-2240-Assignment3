@@ -131,8 +131,6 @@ public class RentalSystem {
     
 //    saving text files
     
-    
-    
 //    saves vehicle to txt file  
     private void saveVehicle(Vehicle vehicle) {
         try (FileWriter writer = new FileWriter(VEHICLES_FILE, true)) {
@@ -207,12 +205,19 @@ public class RentalSystem {
         }
     }
     
-    public void addVehicle(Vehicle vehicle) {
-        vehicles.add(vehicle);
+    public boolean addVehicle(Vehicle vehicle) {
+    	if(findVehicleByPlate(vehicle.getLicensePlate()) != null) {
+    		System.out.println("Error: license plate " + vehicle.getLicensePlate() + " already exists.");
+    		return false;
+    	}
+    	return true;
     }
 
     public void addCustomer(Customer customer) {
-        customers.add(customer);
+        if(findCustomerById(customer.getCustomerId()) != null) {
+    		System.out.println("Error: customer id " + customer.getCustomerId() + " already exists.");
+
+        }
     }
 
     public void rentVehicle(Vehicle vehicle, Customer customer, LocalDate date, double amount) {
