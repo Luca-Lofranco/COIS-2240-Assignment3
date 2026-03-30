@@ -18,7 +18,7 @@ public class RentalSystem {
     private static final String CUSTOMERS_FILE = "customers.txt";
     private static final String RECORDS_FILE   = "rental_records.txt";
     
-    private RentalSystem() {}
+    private RentalSystem() { loadData(); }
     
     public static RentalSystem getInstance() {
         if (instance == null) {
@@ -210,21 +210,28 @@ public class RentalSystem {
     		System.out.println("Error: license plate " + vehicle.getLicensePlate() + " already exists.");
     		return false;
     	}
+    	vehicles.add(vehicle);
+    	saveVehicle(vehicle);
     	return true;
     }
 
     public void addCustomer(Customer customer) {
         if(findCustomerById(customer.getCustomerId()) != null) {
     		System.out.println("Error: customer id " + customer.getCustomerId() + " already exists.");
-
+    		return;
         }
+        customers.add(customer);
+        saveCustomer(customer);
     }
 
     public void rentVehicle(Vehicle vehicle, Customer customer, LocalDate date, double amount) {
         if (vehicle.getStatus() == Vehicle.VehicleStatus.Available) {
             vehicle.setStatus(Vehicle.VehicleStatus.Rented);
-            rentalHistory.addRecord(new RentalRecord(vehicle, customer, date, amount, "RENT"));
+            RentalRecord record = new RentalRecord(vehicle, customer, date, amount, "RENT");
+            rentalHistory.addRecord(record);
             System.out.println("Vehicle rented to " + customer.getCustomerName());
+            saveRecord(record);
+            overwriteAllVehicles();
         }
         else {
             System.out.println("Vehicle is not available for renting.");

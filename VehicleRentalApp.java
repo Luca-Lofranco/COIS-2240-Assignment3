@@ -60,7 +60,10 @@ public class VehicleRentalApp {
                     
                     if (vehicle != null){
 	                    vehicle.setLicensePlate(plate);
-	                    rentalSystem.addVehicle(vehicle);
+	                    if(rentalSystem.addVehicle(vehicle)) {
+                            System.out.println("Vehicle added successfully.");
+	                    }
+	                    
                     }
                     else {
 	                    System.out.println("Vehicle not added successfully.");
@@ -106,6 +109,7 @@ public class VehicleRentalApp {
                     break;
 
                 case 4:
+                	rentalSystem.displayVehicles(Vehicle.VehicleStatus.Available);
                 	rentalSystem.displayVehicles(Vehicle.VehicleStatus.Rented);
 
                 	System.out.print("Enter license plate: ");
